@@ -58,9 +58,6 @@ public class User implements UserDetails {
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<Authority> authorities;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_has_permissions", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions;
@@ -122,10 +119,6 @@ public class User implements UserDetails {
      * .collect(Collectors.toSet());
      * }
      */
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
-    }
 
     public Set<Permission> getPermissions() {
         return permissions;
