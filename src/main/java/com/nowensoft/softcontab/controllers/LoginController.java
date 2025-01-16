@@ -1,15 +1,17 @@
 package com.nowensoft.softcontab.controllers;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.Authentication;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class LoginController { 
     @GetMapping("/login")
-    public String login() {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    System.out.println("mi password: "+encoder.encode("N0w3n2104$"));
+    public String login(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return "redirect:/home"; // Redirige a /home si ya está autenticado
+        }
         return "login"; // Nombre de la plantilla Thymeleaf
     }
 }
