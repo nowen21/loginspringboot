@@ -150,7 +150,7 @@ public class User implements UserDetails {
 ```java
 @Entity
 @Table(name = "roles")
-public class Role implements GrantedAuthority {
+public class Role implements GrantedAuthority{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -158,18 +158,40 @@ public class Role implements GrantedAuthority {
     private String nombre;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "roles_permisos",
-        joinColumns = @JoinColumn(name = "rol_id"),
-        inverseJoinColumns = @JoinColumn(name = "permiso_id")
-    )
+    @JoinTable(name = "role_has_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions;
+
+    // Getters y setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public Set<Permission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<Permission> permissions) {
+        this.permissions = permissions;
+    }
 
     @Override
     public String getAuthority() {
-        return "ROLE_" + this.nombre;
+        return nombre;
     }
-}
+
 ```
 
 #### Entidad Permission
