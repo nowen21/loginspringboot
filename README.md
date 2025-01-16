@@ -1,6 +1,6 @@
 # Login con Spring Boot y Spring Security
 
-Este proyecto implementa un sistema robusto de autenticación y autorización utilizando **Spring Security**, basado en roles y permisos. Ofrece un control granular sobre las acciones que los usuarios pueden realizar, combinando roles para agrupar permisos y permisos individuales para un acceso más detallado.
+Este proyecto implementa un sistema robusto de autenticación y autorización utilizando **Spring Security**, una herramienta ampliamente adoptada por su flexibilidad, integración nativa con Spring Boot y capacidad para manejar autenticación basada en roles y permisos. En comparación con otras soluciones, destaca por su facilidad de personalización y su enfoque modular., basado en roles y permisos. Ofrece un control granular sobre las acciones que los usuarios pueden realizar, combinando roles para agrupar permisos y permisos individuales para un acceso más detallado.
 
 ## Incluye:
 - Gestión de usuarios, roles y permisos.
@@ -16,6 +16,10 @@ Proyectos que requieren **seguridad avanzada** y **personalización** en la gest
 
 ### 1. Diseño del Modelo de Datos
 Se definieron las siguientes tablas en la base de datos:
+
+![Diagrama ER](ruta/diagrama-er.png)
+
+Este diagrama ilustra las relaciones entre las tablas `usuarios`, `roles`, `permisos`, `usuarios_roles` y `roles_permisos`, destacando las conexiones y claves primarias/foráneas involucradas.
 
 - **usuarios**: Almacena información de los usuarios como `username`, `password` y `enabled`.
 - **roles**: Define roles como `ADMIN` o `USER`.
@@ -94,7 +98,7 @@ public class Permission implements GrantedAuthority {
 
 ### 3. Servicio de Autenticación Personalizado
 
-Se creó la clase `CustomUserDetailsService` para cargar los usuarios desde la base de datos:
+Se creó la clase `CustomUserDetailsService` para cargar los usuarios desde la base de datos, manejando casos especiales como usuarios deshabilitados o inexistentes. Si el usuario no se encuentra, lanza una excepción `UsernameNotFoundException`. Además, verifica el estado del usuario a través del campo `enabled` para garantizar que solo usuarios activos puedan iniciar sesión.
 
 ```java
 @Service
@@ -126,7 +130,20 @@ public class CustomUserDetailsService implements UserDetailsService {
 ```
 
 ### 4. Configuración de Spring Security
-Se configuró una clase `SecurityConfig` para proteger rutas según roles y permisos:
+Se configuró una clase `SecurityConfig` para proteger rutas según roles y permisos. Además, incluye configuraciones avanzadas para proteger métodos mediante anotaciones, como `@PreAuthorize` y `@Secured`, permitiendo controlar el acceso a nivel de método:
+
+```java
+@PreAuthorize("hasAuthority('CREAR_USUARIO')")
+public void crearUsuario() {
+    // Lógica para crear usuario
+}
+
+@Secured("ROLE_ADMIN")
+public void eliminarUsuario() {
+    // Lógica para eliminar usuario
+}
+```
+
 
 ```java
 @Configuration
@@ -162,7 +179,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 ```
 
 ### 5. Encriptación de Contraseñas
-Se utilizó **BCrypt** para garantizar la seguridad:
+Se utilizó **BCrypt** para garantizar la seguridad de las contraseñas almacenadas en la base de datos, proporcionando un alto nivel de protección contra ataques de fuerza bruta y diccionario. Este enfoque asegura que las contraseñas no se guarden en texto plano y sean resistentes a compromisos de datos.
 
 ```java
 @Bean
@@ -172,7 +189,7 @@ public PasswordEncoder passwordEncoder() {
 ```
 
 ### 6. Frontend con Thymeleaf
-Se integró Thymeleaf para mostrar u ocultar elementos según los permisos y roles del usuario autenticado:
+Se integró Thymeleaf para mostrar u ocultar elementos según los permisos y roles del usuario autenticado, utilizando expresiones de autorización que permiten una gestión dinámica de la interfaz basada en el nivel de acceso de cada usuario. Esto asegura que solo los elementos permitidos sean visibles para cada rol o permiso.
 
 ```html
 <button th:if="${#authorization.expression('hasAuthority(\'CREAR_USUARIO\')')}" type="button">
