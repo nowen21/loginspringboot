@@ -3,14 +3,14 @@
 Este proyecto implementa un sistema robusto de autenticación y autorización utilizando **Spring Security**, una herramienta ampliamente adoptada por su flexibilidad, integración nativa con Spring Boot y capacidad para manejar autenticación basada en roles y permisos. En comparación con otras soluciones, destaca por su facilidad de personalización y su enfoque modular., basado en roles y permisos. Ofrece un control granular sobre las acciones que los usuarios pueden realizar, combinando roles para agrupar permisos y permisos individuales para un acceso más detallado.
 
 ## Incluye:
-- Gestión de usuarios, roles y permisos.
-- Validación de acceso basada en reglas de seguridad.
-- Frontend con **Thymeleaf** para el manejo dinámico de permisos en la interfaz.
-- Uso de **BCrypt** para la encriptación de contraseñas.
-- Integración con **MySQL** como base de datos relacional.
+- Gestión de usuarios, roles y permisos, permitiendo asignar múltiples roles a un usuario y definir permisos específicos para cada acción dentro del sistema.
+- Validación de acceso basada en reglas de seguridad, incluyendo protección de rutas y métodos mediante configuraciones avanzadas de Spring Security como @PreAuthorize y @Secured, garantizando un control preciso del acceso.
+- Frontend con Thymeleaf para el manejo dinámico de permisos en la interfaz, permitiendo adaptar la visualización de elementos de forma personalizada según los roles y permisos del usuario autenticado.
+- Uso de BCrypt para la encriptación de contraseñas, garantizando seguridad avanzada mediante hashing, lo que dificulta ataques de fuerza bruta y asegura que las contraseñas no se almacenen en texto plano.
+- Integración con MySQL como base de datos relacional, utilizando Spring Data JPA para interactuar con las entidades y gestionar transacciones de forma eficiente. Esta configuración asegura un rendimiento óptimo y facilita la portabilidad hacia otros sistemas de bases de datos relacionales si es necesario.
 
 ### Ideal para:
-Proyectos que requieren **seguridad avanzada** y **personalización** en la gestión de acceso.
+Proyectos que requieren seguridad avanzada, personalización en la gestión de acceso y un control granular adaptado a diferentes niveles de autorización.
 
 ## Implementación de la Integración con Spring Security y Base de Datos
 
@@ -21,15 +21,16 @@ Se definieron las siguientes tablas en la base de datos:
 
 Este diagrama ilustra las relaciones entre las tablas `usuarios`, `roles`, `permisos`, `usuarios_roles` y `roles_permisos`, destacando las conexiones y claves primarias/foráneas involucradas.
 
-- **usuarios**: Almacena información de los usuarios como `username`, `password` y `enabled`.
+- **users**: Almacena información de los usuarios como `username`, `password` y `enabled`.
 - **roles**: Define roles como `ADMIN` o `USER`.
-- **permisos**: Contiene acciones como `CREAR_USUARIO` o `EDITAR_REPORTE`.
-- **usuarios_roles**: Relaciona usuarios con roles.
-- **roles_permisos**: Relaciona roles con permisos.
+- **permissions**: Contiene acciones como `CREAR_USUARIO` o `EDITAR_REPORTE`.
+- **user_has_permissions**: Relaciona usuarios con permisos.
+- **user_has_roles**: Relaciona usuarios con roles.
+- **roles_has_permissions**: Relaciona roles con permisos.
 
 ### 2. Creación de Entidades JPA
 
-#### Entidad Usuario
+#### Entidad User
 ```java
 @Entity
 @Table(name = "users")
