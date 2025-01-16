@@ -197,17 +197,40 @@ public class Role implements GrantedAuthority{
 #### Entidad Permission
 ```java
 @Entity
-@Table(name = "permisos")
-public class Permission implements GrantedAuthority {
+@Table(name = "permissions")
+public class Permission  implements GrantedAuthority{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String nombre;
 
+    // Getters y setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
     @Override
     public String getAuthority() {
-        return this.nombre;
+       return nombre;
+    }
+
+    @Override
+    public String toString() {
+        return "Permission [id=" + id + ", nombre=" + nombre + "]";
     }
 }
 ```
@@ -218,31 +241,26 @@ Se creó la clase `CustomUserDetailsService` para cargar los usuarios desde la b
 
 ```java
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+public class UserService implements UserDetailsService {
+    private static final Logger logger =  LoggerFactory.getLogger(UserService.class);
+    private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-
-        Set<GrantedAuthority> authorities = new HashSet<>();
-
-        usuario.getRoles().forEach(rol -> {
-            authorities.add(rol);
-            authorities.addAll(rol.getPermissions());
-        });
-
-        return new User(
-            usuario.getUsername(),
-            usuario.getPassword(),
-            usuario.isEnabled(),
-            true, true, true,
-            authorities
-        );
+    // Constructor-based injection
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
+
+     @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    return new UsernameNotFoundException("Usuario no encontrado: " + username);
+                });
+        return user;
+    }  
+
 }
+
 ```
 
 ### 4. Configuración de Spring Security
@@ -263,33 +281,32 @@ public void eliminarUsuario() {
 
 ```java
 @Configuration
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+public class SecurityConfig {
+    private final UserService userService; // Nuestro servicio personalizado
+
+    public SecurityConfig(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true) // Redirige al usuario a /home después del login
+                        .permitAll())
+                .logout(logout -> logout.permitAll());
+        return http.build();
+    }
+
+  
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests()
-            .antMatchers("/admin/**").hasRole("ADMIN")
-            .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-            .antMatchers("/public/**").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .formLogin().loginPage("/login").permitAll()
-            .and()
-            .logout().permitAll();
     }
 }
 ```
@@ -320,8 +337,8 @@ Se integró Thymeleaf para mostrar u ocultar elementos según los permisos y rol
 
 ## Tecnologías Utilizadas
 
-- **Java 11**
-- **Spring Boot 2.7+**
+- **Java 21**
+- **Spring Boot 3.4.1+**
 - **Spring Security**
 - **Thymeleaf**
 - **MySQL**
