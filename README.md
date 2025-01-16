@@ -26,7 +26,7 @@ Este diagrama ilustra las relaciones entre las tablas `usuarios`, `roles`, `perm
 - **permissions**: Contiene acciones como `CREAR_USUARIO` o `EDITAR_REPORTE`.
 - **user_has_permissions**: Relaciona usuarios con permisos.
 - **user_has_roles**: Relaciona usuarios con roles.
-- **roles_has_permissions**: Relaciona roles con permisos.
+- **role_has_permissions**: Relaciona roles con permisos.
 
 ### 2. Creación de Entidades JPA
 
