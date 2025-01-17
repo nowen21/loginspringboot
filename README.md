@@ -319,10 +319,10 @@ public PasswordEncoder passwordEncoder() {
 Se integró Thymeleaf para mostrar u ocultar elementos según los permisos y roles del usuario autenticado, utilizando expresiones de autorización que permiten una gestión dinámica de la interfaz basada en el nivel de acceso de cada usuario. Esto asegura que solo los elementos permitidos sean visibles para cada rol o permiso.
 
 ```html
-<button th:if="${#authorization.expression('hasAuthority(\'CREAR_USUARIO\')')}" type="button">
+<button sec:authorize="hasAuthority('PERMISO_USUARIO')" type="button">
     Crear Usuario
 </button>
-<p th:if="${#authorization.expression('hasRole(\'ADMIN\')')}">
+<p sec:authorize="hasAuthority('PERMISO_USUARIO')">
     Bienvenido, Administrador.
 </p>
 ```
@@ -335,6 +335,7 @@ Se integró Thymeleaf para mostrar u ocultar elementos según los permisos y rol
 - **Spring Boot 3.4.1+**
 - **Spring Security**
 - **Thymeleaf**
+- **Maven**
 - **MySQL**
 
 ---
